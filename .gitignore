@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#except pycharm .idea
+.idea
+HTML_API_TOKEN.py
