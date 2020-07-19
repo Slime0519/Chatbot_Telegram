@@ -18,6 +18,8 @@ url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
 chat_id = response['result'][-1]['message']['from']['id']
 chat_text = response['result'][-2]['message']['text']
 
+print(chat_id)
+
 #send message
 requests.get(url, params={'chat_id':chat_id, 'text':"i'm junmyeong bot"})
 
