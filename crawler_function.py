@@ -4,14 +4,7 @@ import os
 import telegram
 import HTML_API_TOKEN
 
-FilePath = 'article_list'
-
-def remove_repetition(list):
-    templist = []
-    for element in list:
-        if not element in templist:
-            templist.append(element)
-    return templist
+FilePath = '../article_list'
 
 def get_lastest_notice():
     req = requests.get("https://college.gist.ac.kr/prog/bbsArticle/BBSMSTR_000000005587/list.do")
@@ -22,10 +15,9 @@ def get_lastest_notice():
     parser = BeautifulSoup(html, 'html.parser')
     post_names = parser.select('#txt > div > div.no-more-tables > table > tbody > tr > td.subject > a')
 
-    namelist_lastest = []
+    namelist_lastest = set()
     for post_name in post_names:
-        namelist_lastest.append(post_name.text)
-    namelist_lastest = remove_repetition(namelist_lastest)  # 중복 원소 제거
+        namelist_lastest.add(post_name.text)
     namelist_lastest = list(namelist_lastest)
 
     return namelist_lastest
