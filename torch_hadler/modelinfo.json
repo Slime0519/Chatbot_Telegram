@@ -1,0 +1,9 @@
+{
+ "model_name":"kogpt2",
+ "mode":"text_generation",
+ "num_labels":"None",
+ "save_mode":"pretrained",
+ "max_length":"200",
+ "captum_explanation":true,
+ "embedding_name": "GPT"
+}
