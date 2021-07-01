@@ -1,9 +1,9 @@
 import telegram
 from telegram.ext import Updater
-from torch_hadler.handler import addhandlers
+from torch_handler.api_handler import addhandlers
 
 import HTML_API_TOKEN
-from torch_hadler.handler import *
+from torch_handler.api_handler import *
 
 
 tokenclass = HTML_API_TOKEN.API_TOKEN()

@@ -13,6 +13,9 @@ from ts.torch_handler.base_handler import BaseHandler
 logger = logging.getLogger(__name__)
 
 
+#torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file Language_Model/model.py
+#--serialized-file Language_Model kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
+
 class TransformersClassifierHandler(BaseHandler, ABC):
     """
     Transformers text classifier handler class. This handler takes a text (string) and
@@ -29,7 +32,7 @@ class TransformersClassifierHandler(BaseHandler, ABC):
         model_dir = properties.get("model_dir")
 
         # Read the mapping file, index to object name
-        mapping_file_path = os.path.join(model_dir, "index_to_name.json")
+        #mapping_file_path = os.path.join(model_dir, "index_to_name.json")
 
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
@@ -43,17 +46,19 @@ class TransformersClassifierHandler(BaseHandler, ABC):
 
 
         self.transfomers_path = self.modelconfig["transformers_path"]
-        self.weight_path = model_dir + self.modelconfig["weight_path"]
-
+        serialized_file = self.manifest['model']['serializedFile']
+        model_pt_path = os.path.join(model_dir, serialized_file)
+        if not os.path.isfile(model_pt_path):
+            raise RuntimeError("Missing the model.pt file")
 
         # Read model serialize/pt file
         if self.modelconfig["model_name"] == "kogpt2":
-            self.model = GPTmodel()
-            checkpoint = torch.load(self.weight_path, map_location=self.device)
-            model = GPTmodel()
-            model.load_state_dict(checkpoint['model_state_dict'])
 
-            tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transfomers_path,
+            checkpoint = torch.load(model_pt_path, map_location=self.device)
+            self.model = GPTmodel()
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+
+            self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transfomers_path,
                                                                 bos_token='</s>',
                                                                 eos_token='</s>',
                                                                 unk_token='<unk>',
@@ -62,13 +67,6 @@ class TransformersClassifierHandler(BaseHandler, ABC):
         self.model.eval()
 
         logger.debug('Transformer model from path {0} loaded successfully'.format(model_dir))
-
-
-        if os.path.isfile(mapping_file_path):
-            with open(mapping_file_path) as f:
-                self.mapping = json.load(f)
-        else:
-            logger.warning('Missing the index_to_name.json file. Inference output will not include class name.')
         self.initialized = True
 
     def preprocess(self, data):
@@ -113,20 +111,18 @@ class TransformersClassifierHandler(BaseHandler, ABC):
 
         return inference_output
 
-_service = TransformersClassifierHandler()
+    def handle(self, data, context):
+        try:
+            if not self.initialized:
+                self.initialize(context)
 
-def handle(data, context):
-    try:
-        if not _service.initialized:
-            _service.initialize(context)
+            if data is None:
+                return None
 
-        if data is None:
-            return None
+            data = self.preprocess(data)
+            data = self.inference(data)
+            data = self.postprocess(data)
 
-        data = _service.preprocess(data)
-        data = _service.inference(data)
-        data = _service.postprocess(data)
-
-        return data
-    except Exception as e:
-        raise e
+            return data
+        except Exception as e:
+            raise e
