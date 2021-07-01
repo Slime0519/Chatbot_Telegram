@@ -6,7 +6,8 @@ import os
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from Language_Model.model import GPTmodel
+#from Language_Model.model import GPTmodel
+from model import GPTmodel
 from transformers import PreTrainedTokenizerFast
 from ts.torch_handler.base_handler import BaseHandler
 
@@ -36,29 +37,30 @@ class TransformersClassifierHandler(BaseHandler, ABC):
 
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
-        model_file_path = os.path.join(model_dir, "modelinfo.json")
+        #model_file_path = os.path.join(model_dir, "modelinfo.json")
 
-        if os.path.isfile(model_file_path):
-            with open(model_file_path) as f:
-                self.modelconfig = json.load(f)
-        else:
-            logger.warning("Missing the pretrained GPT model path file")
+        #if os.path.isfile(model_file_path):
+        #    with open(model_file_path) as f:
+        #        self.modelconfig = json.load(f)
+        #else:
+        #    logger.warning("Missing the pretrained GPT model path file")
 
 
-        self.transfomers_path = self.modelconfig["transformers_path"]
+        #self.transfomers_path = self.modelconfig["transformers_path"]
+        self.transformers_path = "skt/kogpt2-base-v2"
         serialized_file = self.manifest['model']['serializedFile']
         model_pt_path = os.path.join(model_dir, serialized_file)
         if not os.path.isfile(model_pt_path):
             raise RuntimeError("Missing the model.pt file")
 
         # Read model serialize/pt file
-        if self.modelconfig["model_name"] == "kogpt2":
+        #if self.modelconfig["model_name"] == "kogpt2":
 
-            checkpoint = torch.load(model_pt_path, map_location=self.device)
-            self.model = GPTmodel()
-            self.model.load_state_dict(checkpoint['model_state_dict'])
+        checkpoint = torch.load(model_pt_path, map_location=self.device)
+        self.model = GPTmodel()
+        self.model.load_state_dict(checkpoint['model_state_dict'])
 
-            self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transfomers_path,
+        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transformers_path,
                                                                 bos_token='</s>',
                                                                 eos_token='</s>',
                                                                 unk_token='<unk>',
