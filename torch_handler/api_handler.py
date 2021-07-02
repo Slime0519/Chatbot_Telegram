@@ -8,7 +8,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from Language_Model.model import GPTmodel
 from transformers import PreTrainedTokenizerFast
-from ts.torch_handler.base_handler import BaseHandler
+#from ts.torch_handler.base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class TransformersClassifierHandler(BaseHandler, ABC):
         coarse_result = self.model.generate(input_ids = inputs["input_ids"])
         fined_result = self.tokenizer.decode(coarse_result[0].tolist()[inputs["original_length"]+1:],
                                              skip_special_tokens = True)
-        logger.info("Model predicted: '%s'", fined_result)
+        #logger.info("Model predicted: '%s'", fined_result)
         return [fined_result]
 
     def postprocess(self, inference_output):

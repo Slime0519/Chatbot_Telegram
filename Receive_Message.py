@@ -1,4 +1,4 @@
-from HTML_API_TOKEN import API_TOKEN
+from private_infomation import API_TOKEN
 import requests
 import json
 

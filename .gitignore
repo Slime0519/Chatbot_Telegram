@@ -130,4 +130,4 @@ dmypy.json
 
 #except pycharm .idea
 .idea
-HTML_API_TOKEN.py
+private_infomation.py

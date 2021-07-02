@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import telegram
-import HTML_API_TOKEN
+import private_infomation
 
 FilePath = '../article_list'
 

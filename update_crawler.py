@@ -2,11 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import telegram
-import HTML_API_TOKEN
+import private_infomation
 
 FilePath = 'article_list'
 
-My_TOKEN_class = HTML_API_TOKEN.API_TOKEN()
+My_TOKEN_class = private_infomation.API_TOKEN()
 MY_TOKEN = My_TOKEN_class.GetToken()
 
 bot = telegram.Bot(token=MY_TOKEN)

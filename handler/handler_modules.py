@@ -1,10 +1,12 @@
 import crawler_function
+import requests
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.ext.updater import Updater
 #tokenclass = HTML_API_TOKEN.API_TOKEN()
 #MYTOKEN =  tokenclass.GetToken()
 #chat_id = '458591856'
 # start
+from private_infomation import serverhandler
 
 def start(update, context : CallbackContext):
     global chat_id
@@ -29,11 +31,12 @@ def help(update, context : CallbackContext):
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
-"""
+
 def GPThandler(update, context):
     content = update.message.text
-    answer =
-"""
+    response = requests.put(serverhandler.calladdr, data={"data" : content})
+    reply = response.text
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply)
 
 def caps(update, context):
     text_caps = ' '.join(context.args).upper()

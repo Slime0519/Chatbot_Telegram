@@ -1,18 +1,19 @@
 import telegram
 from telegram.ext import Updater
-from torch_handler.api_handler import addhandlers
+from handler.handlers import addhandlers
 
-import HTML_API_TOKEN
-from torch_handler.api_handler import *
+import private_infomation
+import logging
+#from torch_handler.api_handler import *
 
 
-tokenclass = HTML_API_TOKEN.API_TOKEN()
+tokenclass = private_infomation.API_TOKEN()
 MYTOKEN =  tokenclass.GetToken()
 #chat_id = '458591856'
 
 
 if __name__ == "__main__":
-    My_TOKEN_class = HTML_API_TOKEN.API_TOKEN()
+    My_TOKEN_class = private_infomation.API_TOKEN()
     MY_TOKEN = My_TOKEN_class.GetToken()
 
     bot = telegram.Bot(token=MY_TOKEN)
