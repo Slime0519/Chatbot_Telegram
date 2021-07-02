@@ -6,8 +6,7 @@ import os
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-#from Language_Model.model import GPTmodel
-from model import GPTmodel
+from Language_Model.model import GPTmodel
 from transformers import PreTrainedTokenizerFast
 from ts.torch_handler.base_handler import BaseHandler
 
@@ -16,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 #torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file Language_Model/model.py
 #--serialized-file Language_Model kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
+#torchserve --start --ncs --model-store model_store --models densenet161.mar
+#docker run --rm -it --gpus all -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 7070:7070 -p 7071:
+#7071 --name mar -v $(pwd)/workspace:/home/model-server/workspace -v $(pwd)/serve/model-store:/home/model-server/model-
+#store -v $(pwd)/serve/examples:/home/model-server/examples pytorch/torchserve:latest-gpu
 
 class TransformersClassifierHandler(BaseHandler, ABC):
     """
@@ -60,10 +63,10 @@ class TransformersClassifierHandler(BaseHandler, ABC):
         self.model = GPTmodel()
         self.model.load_state_dict(checkpoint['model_state_dict'])
 
-        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transformers_path,
-                                                                bos_token='</s>',
-                                                                eos_token='</s>',
-                                                                unk_token='<unk>',
+        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transformers_path, \
+                                                                bos_token='</s>', \
+                                                                eos_token='</s>', \
+                                                                unk_token='<unk>', \
                                                                 pad_token='<pad>', mask_token='<mask>')
         self.model.to(self.device)
         self.model.eval()
@@ -128,3 +131,13 @@ class TransformersClassifierHandler(BaseHandler, ABC):
             return data
         except Exception as e:
             raise e
+
+if __name__ == "__main__":
+    transformers_path = "skt/kogpt2-base-v2"
+    tokenizer = PreTrainedTokenizerFast.from_pretrained(transformers_path, \
+                                                        bos_token='</s>', \
+                                                        eos_token='</s>', \
+                                                        unk_token='<unk>', \
+                                                        pad_token='<pad>', mask_token='<mask>')
+
+    print("complete load tokenizer")
