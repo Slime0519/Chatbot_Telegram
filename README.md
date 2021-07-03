@@ -41,6 +41,7 @@
 ## 3. 작동 데모
 
 
+![Animation](https://user-images.githubusercontent.com/48518274/124354452-046d6900-dc47-11eb-95d6-8ae2cca670cd.gif)
 
 
 
