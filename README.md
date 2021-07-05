@@ -53,10 +53,10 @@
 
 
 ## 5. 참고 자료
-
+- [TorchServe 공식 문서](https://pytorch.org/serve/)
+- [AWS EC2 설명서](https://docs.aws.amazon.com/ko_kr/ec2/?id=docs_gateway)
 - [한승운님의 coronabot 제작기](https://velog.io/@swhan9404/series/telegram-corona)
-- [AWS Lambda 활용 사례](https://aws.amazon.com/ko/blogs/korea/serverless-architecture-by-korean-developers/)
-- [전체 공지 API 만들기](https://jojoldu.tistory.com/308?fbclid=IwAR1CBbcV1ONgskOFRXznf8sUgdpMm0V1cGIUHCjJUX61Dwe6PUTUKlxBbqM)
+- [Korean Language Model for Wellness Conversation](https://github.com/nawnoes/WellnessConversation-LanguageModel)
+- [TorchServe를 이용한 huggingface library 모델 배포하기](https://medium.com/analytics-vidhya/deploy-huggingface-s-bert-to-production-with-pytorch-serve-27b068026d18)
 - [개발 환경 셋팅](https://stackoverflow.com/questions/54198412/developing-using-pycharm-in-docker-container-on-aws-instance)
-- https://exagen.tistory.com/notice/63
 
