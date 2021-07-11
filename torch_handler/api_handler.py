@@ -104,8 +104,11 @@ class TransformersClassifierHandler(BaseHandler, ABC):
         # with "input_ids" and "token_type_ids" - which is true for some popular transformer models, e.g. bert.
         # If your transformer model expects different tokenization, adapt this code to suit
         # its expected input format.
+        input_ids = inputs["input_ids"]
+        input_ids = input_ids.to(self.device)
 
-        coarse_result = self.model.generate(input_ids = inputs["input_ids"])
+        coarse_result = self.model.generate(input_ids = input_ids)
+        coarse_result = coarse_result.to("cpu")
         fined_result = self.tokenizer.decode(coarse_result[0].tolist()[inputs["original_length"]+1:],
                                              skip_special_tokens = True)
         #logger.info("Model predicted: '%s'", fined_result)
