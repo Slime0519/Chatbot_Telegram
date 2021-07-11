@@ -4,7 +4,7 @@ import os
 import telegram
 import private_infomation
 
-FilePath = 'article_list'
+FilePath = '../article_list'
 
 My_TOKEN_class = private_infomation.API_TOKEN()
 MY_TOKEN = My_TOKEN_class.GetToken()

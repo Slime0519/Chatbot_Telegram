@@ -1,5 +1,5 @@
 from telegram.ext import MessageHandler, Filters, CommandHandler  # import modules
-from handler.handler_modules import *
+from handler.telegram_handler.handler_modules import *
 
 def addhandlers(dispatcher):
     checknew_handler = CommandHandler('checknew', check_new_notice)

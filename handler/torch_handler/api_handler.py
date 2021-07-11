@@ -12,21 +12,24 @@ from transformers import PreTrainedTokenizerFast
 
 logger = logging.getLogger(__name__)
 
+#This handler wrote based on \
+# https://medium.com/analytics-vidhya/deploy-huggingface-s-bert-to-production-with-pytorch-serve-27b068026d18
 
-#torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file Language_Model/model.py
-#--serialized-file Language_Model kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
+
+#torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file conversation_model/model.py
+#--serialized-file conversation_model/ kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
 #torchserve --start --ncs --model-store model_store --models densenet161.mar
 #docker run --rm -it --gpus all -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 7070:7070 -p 7071:
 #7071 --name mar -v $(pwd)/workspace:/home/model-server/workspace -v $(pwd)/serve/model-store:/home/model-server/model-
 #store -v $(pwd)/serve/examples:/home/model-server/examples pytorch/torchserve:latest-gpu
 
-class TransformersClassifierHandler(BaseHandler, ABC):
+class ConverstaionModelHandler(BaseHandler, ABC):
     """
     Transformers text classifier handler class. This handler takes a text (string) and
     as input and returns the classification text based on the serialized transformers checkpoint.
     """
     def __init__(self):
-        super(TransformersClassifierHandler, self).__init__()
+        super(ConverstaionModelHandler, self).__init__()
         self.initialized = False
 
     def initialize(self, ctx):

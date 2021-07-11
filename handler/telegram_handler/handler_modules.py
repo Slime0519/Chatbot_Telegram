@@ -1,12 +1,11 @@
-import crawler_function
 import requests
 from telegram.ext.callbackcontext import CallbackContext
-from telegram.ext.updater import Updater
 #tokenclass = HTML_API_TOKEN.API_TOKEN()
 #MYTOKEN =  tokenclass.GetToken()
 #chat_id = '458591856'
 # start
-from private_infomation import serverhandler
+from handler.telegram_handler import serverhandler, crawler_function
+
 
 def start(update, context : CallbackContext):
     global chat_id
