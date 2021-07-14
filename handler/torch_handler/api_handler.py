@@ -6,7 +6,7 @@ import os
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from Language_Model.model import GPTmodel
+from conversation_model.model import ConverstaionLM
 from transformers import PreTrainedTokenizerFast
 #from ts.torch_handler.base_handler import BaseHandler
 
@@ -14,14 +14,6 @@ logger = logging.getLogger(__name__)
 
 #This handler wrote based on \
 # https://medium.com/analytics-vidhya/deploy-huggingface-s-bert-to-production-with-pytorch-serve-27b068026d18
-
-
-#torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file conversation_model/model.py
-#--serialized-file conversation_model/ kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
-#torchserve --start --ncs --model-store model_store --models densenet161.mar
-#docker run --rm -it --gpus all -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 7070:7070 -p 7071:
-#7071 --name mar -v $(pwd)/workspace:/home/model-server/workspace -v $(pwd)/serve/model-store:/home/model-server/model-
-#store -v $(pwd)/serve/examples:/home/model-server/examples pytorch/torchserve:latest-gpu
 
 class ConverstaionModelHandler(BaseHandler, ABC):
     """
@@ -37,40 +29,26 @@ class ConverstaionModelHandler(BaseHandler, ABC):
 
         properties = ctx.system_properties
         model_dir = properties.get("model_dir")
-
-        # Read the mapping file, index to object name
-        #mapping_file_path = os.path.join(model_dir, "index_to_name.json")
-
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
-        #model_file_path = os.path.join(model_dir, "modelinfo.json")
-
-        #if os.path.isfile(model_file_path):
-        #    with open(model_file_path) as f:
-        #        self.modelconfig = json.load(f)
-        #else:
-        #    logger.warning("Missing the pretrained GPT model path file")
-
-
-        #self.transfomers_path = self.modelconfig["transformers_path"]
-        self.transformers_path = "skt/kogpt2-base-v2"
-        serialized_file = self.manifest['model']['serializedFile']
-        model_pt_path = os.path.join(model_dir, serialized_file)
-        if not os.path.isfile(model_pt_path):
-            raise RuntimeError("Missing the model.pt file")
+        # Load Conversation model
+        model_config_path = os.path.join(model_dir, "config.json")
+        self.model = ConverstaionLM(configpath=model_config_path)
 
         # Read model serialize/pt file
-        #if self.modelconfig["model_name"] == "kogpt2":
+        serialized_file = self.manifest['model']['serializedFile']
+        model_pt_path = os.path.join(model_dir, serialized_file)
+
+        if not os.path.isfile(model_pt_path):
+            raise RuntimeError("Missing the serialized file")
 
         checkpoint = torch.load(model_pt_path, map_location=self.device)
-        self.model = GPTmodel()
         self.model.load_state_dict(checkpoint['model_state_dict'])
 
-        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.transformers_path, \
-                                                                bos_token='</s>', \
-                                                                eos_token='</s>', \
-                                                                unk_token='<unk>', \
-                                                                pad_token='<pad>', mask_token='<mask>')
+        # tokenizer config loaded by config.json and tokenizer config jsons.
+        # reference : https://medium.com/analytics-vidhya/deploy-huggingface-s-bert-to-production-with-pytorch-serve-27b068026d18
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
+
         self.model.to(self.device)
         self.model.eval()
 
@@ -78,20 +56,13 @@ class ConverstaionModelHandler(BaseHandler, ABC):
         self.initialized = True
 
     def preprocess(self, data):
-        """ Very basic preprocessing code - only tokenizes.
-            Extend with your own preprocessing steps as needed.
-        """
+
         text = data[0].get("data")
         if text is None:
             text = data[0].get("body")
         sentences = text.decode('utf-8')
-        logger.info("Received text: '%s'", sentences)
 
-        encoded_context = self.tokenizer.encode(
-            sentences,
-            #add_special_tokens=True,
-            #return_tensors="pt"
-        )
+        encoded_context = self.tokenizer.encode(sentences)
 
         input_ids = torch.tensor([self.tokenizer.bos_token_id] + encoded_context + [self.tokenizer.eos_token_id] + \
                               [self.tokenizer.bos_token_id]).unsqueeze(0)
@@ -110,16 +81,16 @@ class ConverstaionModelHandler(BaseHandler, ABC):
         input_ids = inputs["input_ids"]
         input_ids = input_ids.to(self.device)
 
-        coarse_result = self.model.generate(input_ids = input_ids)
+        coarse_result = self.model.generate(input_ids = input_ids, )
         coarse_result = coarse_result.to("cpu")
         fined_result = self.tokenizer.decode(coarse_result[0].tolist()[inputs["original_length"]+1:],
                                              skip_special_tokens = True)
         #logger.info("Model predicted: '%s'", fined_result)
+
         return [fined_result]
 
     def postprocess(self, inference_output):
         # TODO: Add any needed post-processing of the model predictions here
-
         return inference_output
 
     def handle(self, data, context):
@@ -147,3 +118,10 @@ if __name__ == "__main__":
                                                         pad_token='<pad>', mask_token='<mask>')
 
     print("complete load tokenizer")
+
+#torch-model-archiver --model-name chatter-kogpt2 --version 1.0 --model-file conversation_model/model.py
+#--serialized-file conversation_model/ kogpt2-wellnesee-auto-regressive1.pth --handler torch_handler/api_handler.py
+#torchserve --start --ncs --model-store model_store --models densenet161.mar
+#docker run --rm -it --gpus all -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 7070:7070 -p 7071:
+#7071 --name mar -v $(pwd)/workspace:/home/model-server/workspace -v $(pwd)/serve/model-store:/home/model-server/model-
+#store -v $(pwd)/serve/examples:/home/model-server/examples pytorch/torchserve:latest-gpu
